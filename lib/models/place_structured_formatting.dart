@@ -7,10 +7,12 @@ class PlaceStructuredFormatting {
     this.secondaryText = '',
   });
 
-  factory PlaceStructuredFormatting.fromJson(Map<String, dynamic> json) {
-    return PlaceStructuredFormatting(
-      mainText: json['main_text'],
-      secondaryText: json['secondary_text'],
-    );
-  }
+  PlaceStructuredFormatting.fromJson(Map<String, dynamic> json)
+    : mainText = json['main_text'],
+      secondaryText = json['secondary_text'];
+
+  Map<String, dynamic> toJson() => {
+    "mainText": mainText,
+    "secondaryText": secondaryText,
+  };
 }

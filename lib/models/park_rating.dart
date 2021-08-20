@@ -16,14 +16,43 @@ class ParkRating {
   });
 
   factory ParkRating.fromJson(Map<String, dynamic> json) {
-    print(json);
+    int _roundRating(num value) {
+      return value is double
+        ? value.round()
+        : value.toInt();
+    }
+
     return ParkRating(
-      cleanliness: json['cleanliness'],
-      noise: json['noise'],
-      size: json['size'],
-      location: json['location'],
-      activityEquipment: json['activityEquipment'],
+      cleanliness: _roundRating(json['cleanliness']),
+      noise: _roundRating(json['noise']),
+      size: _roundRating(json['size']),
+      location: _roundRating(json['location']),
+      activityEquipment: _roundRating(json['activityEquipment']),
       notes: json['notes'],
     );
+  }
+  // #region
+  // ParkRating.fromJson(Map<String, dynamic> json)
+  //   : cleanliness = _roundRating(json['cleanliness']),
+  //     noise = json['noise'],
+  //     size = json['size'],
+  //     location = json['location'],
+  //     activityEquipment = json['activityEquipment'],
+  //     notes = json['notes'];
+  // #endregion
+
+  Map<String, dynamic> toJson() => {
+    "cleanliness": cleanliness,
+    "noise": noise,
+    "size": size,
+    "location": location,
+    "activityEquipment": activityEquipment,
+    "notes": notes,
+  };
+
+  int _roundRating(num value) {
+    return value is double
+      ? value.round()
+      : value.toInt();
   }
 }

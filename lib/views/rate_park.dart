@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:parks_bark/app/global_styles.dart';
 import 'package:parks_bark/app/strings.dart';
 import 'package:parks_bark/app/text_styles.dart';
 import 'package:parks_bark/models/current_park.dart';
+import 'package:parks_bark/models/park.dart';
 import 'package:parks_bark/models/park_image.dart';
+import 'package:parks_bark/models/park_rating.dart';
+import 'package:parks_bark/services/rated_parks_service.dart';
 import 'package:parks_bark/views/Home.dart';
 import 'package:parks_bark/views/rating_submitted.dart';
 import 'package:parks_bark/molecules/rating_group.dart';
@@ -41,10 +45,13 @@ class _RateParkPageState extends State<RateParkPage> {
   @override
   Widget build(BuildContext context) {
     var parkImage = context.watch<ParkImage>().currentImage;
+    final parkImageFile = context.watch<ParkImage>().currentImageAsFile;
+    var currentPark = context.watch<CurrentPark>().currentPark;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppStrings.ratePark),
+        elevation: AppStyles.appBarElevation,
       ),
       body: Container(
         padding: EdgeInsets.only(left: 16, right: 16, top: 32),
@@ -60,9 +67,9 @@ class _RateParkPageState extends State<RateParkPage> {
               //   ),
               // ),
               RatingHeading(
-                  name: context.watch<CurrentPark>().currentPark?.id ?? '',
-                  addressLine1: context.watch<CurrentPark>().currentPark?.description ?? '',
-                  addressLine2: context.watch<CurrentPark>().currentPark?.description ?? '',
+                  name: currentPark?.name ?? '',
+                  addressLine1: currentPark?.description ?? '',
+                  addressLine2: '',
                 ),
               RatingGroup(
                 title: AppStrings.cleanliness,
@@ -101,6 +108,21 @@ class _RateParkPageState extends State<RateParkPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
+                              Visibility(
+                                visible: parkImageFile != null,
+                                child: Container(
+                                  height: 48,
+                                  width: 48,
+                                  margin: EdgeInsets.only(right: 16.0),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                      image: FileImage(parkImageFile!),
+                                      fit: BoxFit.cover,
+                                    )
+                                  ),
+                                ),
+                              ),
                               Container(
                                 width: 200.0,
                                 child:  Text(
@@ -195,7 +217,23 @@ class _RateParkPageState extends State<RateParkPage> {
                       Text(AppStrings.submit),
                     ],
                   ),
-                  onPressed: _submitRating,
+                  onPressed: () {
+                    if (currentPark?.id != null && currentPark?.name != null && currentPark?.description != null) {
+                      _submitRating(Park(
+                        id: currentPark!.id,
+                        name: currentPark.name,
+                        description: currentPark.description,
+                        rating: ParkRating(
+                          cleanliness: _cleanlinessRating,
+                          noise: _noiseRating,
+                          location: _locationRating,
+                          size: _sizeRating,
+                          activityEquipment: _activityEquipmentRating,
+                          notes: '',
+                        )
+                      ));
+                    }
+                  },
                 ),
               ),
             ],
@@ -243,11 +281,64 @@ class _RateParkPageState extends State<RateParkPage> {
     );
   }
 
-  void _submitRating () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => RatingSubmittedPage()),
+  void _submitRating (Park park) async {
+    _showLoader();
+    final response = await RatedParksService().submitRating(park);
+    _hideLoader();
+    if (response.statusCode == 201) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RatingSubmittedPage(
+            parkName: park.name,
+            ratings: [
+              park.rating?.cleanliness ?? 0,
+              park.rating?.noise ?? 0,
+              park.rating?.size ?? 0,
+              park.rating?.location ?? 0,
+              park.rating?.activityEquipment ?? 0,
+            ],
+          )
+        ),
+      );
+    } else {
+      throw Exception('Failed to create rating.');
+    }
+  }
+
+  void _showLoader() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => Dialog(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              child: Column(
+                children: [
+                  CircularProgressIndicator(
+                    color: BrandColors.brandAccent,
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 16),
+                    child: const Text(
+                      AppStrings.submitting,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      )
     );
+  }
+
+  void _hideLoader() {
+    Navigator.pop(context);
   }
 }
 

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:parks_bark/app/Strings.dart';
+import 'package:parks_bark/app/strings.dart';
 import 'package:parks_bark/app/text_styles.dart';
 import 'package:parks_bark/models/park.dart';
 import 'package:parks_bark/models/current_park.dart';
 import 'package:parks_bark/models/place_result.dart';
 import 'package:parks_bark/services/place_service.dart';
+import 'package:parks_bark/services/rated_parks_service.dart';
 import 'package:parks_bark/views/view_rating.dart';
 import 'package:provider/provider.dart';
 
@@ -66,7 +67,7 @@ class ParkSearch extends SearchDelegate {
               children: [
                 Center(
                   child: const Text(
-                    'No Results Found',
+                    AppStrings.noResults,
                     style: AppTextStyles.shadowHint,
                   ),
                 )
@@ -77,7 +78,11 @@ class ParkSearch extends SearchDelegate {
             return ListView.builder(
               itemCount: results?.length,
               itemBuilder: (context, index) {
-                return _ResultListItem(description: results?[index].description ?? '',);
+                return _ResultListItem(
+                  parkId: results?[index].id ?? '',
+                  parkName: results?[index].structuredFormatting?.mainText ?? '',
+                  description: results?[index].structuredFormatting?.secondaryText ?? '',
+                );
               },
             );
           }
@@ -88,25 +93,33 @@ class ParkSearch extends SearchDelegate {
 }
 
 class _ResultListItem extends StatelessWidget {
+  final String parkId;
+  final String parkName;
   final String description;
 
   _ResultListItem({
     Key? key,
+    required this.parkId,
+    required this.parkName,
     required this.description,
   }) : super(key: key);
 
   Widget build(BuildContext context) {
-    var descriptionList = description.split(', ');
-    var title = descriptionList[0];
-    var subtitle = descriptionList.sublist(1).join(', ');
+    var title = parkName;
+    var subtitle = description;
     return Card(
       margin: EdgeInsets.all(2),
       child: ListTile(
         title: Text(title),
         subtitle: Text(subtitle),
-        onTap: () {
+        onTap: () async {
           var parkRef = context.read<CurrentPark>();
-          parkRef.setCurrentPark(Park(id: title, description: subtitle));
+          final parkEntry = await RatedParksService().getParkByPlaceId(parkId);
+          if (parkEntry != null) {
+            parkRef.setCurrentPark(parkEntry);
+          } else {
+            parkRef.setCurrentPark(Park(id: parkId, name: parkName, description: subtitle));
+          }
 
           Navigator.push(
             context,

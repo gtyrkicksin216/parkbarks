@@ -1,16 +1,27 @@
+import 'package:parks_bark/models/place_structured_formatting.dart';
+
 class PlaceResult {
   final String id;
   final String description;
+  final PlaceStructuredFormatting? structuredFormatting;
   // TODO: Pull in rest of info
 
   PlaceResult({
     this.description = '',
     this.id = '',
+    this.structuredFormatting,
   });
 
-  factory PlaceResult.fromJson(Map<String, dynamic> json) {
-    return PlaceResult(id: json['place_id'], description: json['description']);
-  }
+  PlaceResult.fromJson(Map<String, dynamic> json)
+    : id = json['place_id'],
+      description = json['description'],
+      structuredFormatting = PlaceStructuredFormatting.fromJson(json['structured_formatting']);
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "description": description,
+    "structuredFormatting": structuredFormatting,
+  };
 }
 
 // {

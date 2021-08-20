@@ -2,23 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:parks_bark/app/color_sets.dart';
 import 'package:parks_bark/app/strings.dart';
 import 'package:parks_bark/app/text_styles.dart';
+import 'package:parks_bark/app/global_styles.dart';
 import 'package:parks_bark/models/current_park.dart';
 import 'package:parks_bark/molecules/rating_group.dart';
 import 'package:parks_bark/molecules/rating_heading.dart';
 import 'package:parks_bark/views/rate_park.dart';
 import 'package:provider/provider.dart';
 
-class ViewRatingPage extends StatelessWidget {
+class ViewRatingPage extends StatefulWidget {
   ViewRatingPage({ Key? key }) : super(key: key);
 
-  final int _cleanlinessRating = 5;
-  final int _noiseRating = 2;
-  final int _sizeRating = 3;
-  final int _locationRating = 5;
-  final int _activityEquipmentRating = 1;
+  @override
+  _ViewRatingPageState createState() => _ViewRatingPageState();
+}
+
+class _ViewRatingPageState extends State<ViewRatingPage> {
+
+  late int _cleanlinessRating = 0;
+  late int _noiseRating = 0;
+  late int _sizeRating = 0;
+  late int _locationRating = 0;
+  late int _activityEquipmentRating = 0;
 
   @override
   Widget build(BuildContext context) {
+    final _ratings = context.watch<CurrentPark>().currentPark?.rating;
+    if (_ratings != null) {
+      _cleanlinessRating = _ratings.cleanliness;
+      _noiseRating = _ratings.noise;
+      _sizeRating = _ratings.size;
+      _locationRating = _ratings.location;
+      _activityEquipmentRating = _ratings.activityEquipment;
+    }
     Color getColor(Set<MaterialState> states) {
       const Set<MaterialState> interactiveStates = <MaterialState>{
         MaterialState.pressed,
@@ -33,15 +48,19 @@ class ViewRatingPage extends StatelessWidget {
       return BrandColors.brandPrimary;
     }
 
+    final parkRatings = context.watch<CurrentPark>().currentPark;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('View Rating'),
+        title: const Text(AppStrings.viewRating),
+        elevation: AppStyles.appBarElevation,
       ),
       body: SingleChildScrollView(
         child: Container(
-          // padding: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
             children: [
               Container(
                 height: 150,
@@ -63,6 +82,7 @@ class ViewRatingPage extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
                 child: Column(
+                  mainAxisSize: MainAxisSize.max,
                   children: [
                     Container(
                       margin: EdgeInsets.only(bottom: 32),
@@ -77,65 +97,80 @@ class ViewRatingPage extends StatelessWidget {
                             //   ),
                             // ),
                             child: RatingHeading(
-                              name: context.watch<CurrentPark>().currentPark?.id ?? '',
-                              addressLine1: context.watch<CurrentPark>().currentPark?.id ?? '',
-                              addressLine2: context.watch<CurrentPark>().currentPark?.id ?? '',
+                              name: context.watch<CurrentPark>().currentPark?.name ?? '',
+                              addressLine1: context.watch<CurrentPark>().currentPark?.description ?? '',
+                              addressLine2: '',
                             ),
                           ),
                           Row(
                             children: [
-                              _MiniRating(
-                                rating: _getOverallRating([
-                                  _cleanlinessRating,
-                                  _noiseRating,
-                                  _sizeRating,
-                                  _locationRating,
-                                  _activityEquipmentRating
-                                ]),
-                              ),
+                              context.watch<CurrentPark>().currentPark?.rating != null
+                                ? _MiniRating(
+                                  rating: _getOverallRating([
+                                    _cleanlinessRating,
+                                    _noiseRating,
+                                    _sizeRating,
+                                    _locationRating,
+                                    _activityEquipmentRating
+                                  ]),
+                                )
+                                : Container(
+                                  child: const Text(AppStrings.noRatedParks),
+                                )
                             ],
                           ),
                         ],
                       ),
                     ),
-                    RatingGroup(
-                      title: AppStrings.cleanliness,
-                      currentRating: _cleanlinessRating,
-                      onPressedHandler: (value) { },
-                      disabled: true,
-                    ),
-                    RatingGroup(
-                      title: AppStrings.noise,
-                      currentRating: _noiseRating,
-                      onPressedHandler: (value) { },
-                      disabled: true,
-                    ),
-                    RatingGroup(
-                      title: AppStrings.size,
-                      currentRating: _sizeRating,
-                      onPressedHandler: (value) { },
-                      disabled: true,
-                    ),
-                    RatingGroup(
-                      title: AppStrings.location,
-                      currentRating: _locationRating,
-                      onPressedHandler: (value) { },
-                      disabled: true,
-                    ),
-                    RatingGroup(
-                      title: AppStrings.activityEquipment,
-                      currentRating: _activityEquipmentRating,
-                      onPressedHandler: (value) { },
-                      disabled: true,
-                    ),
+                    context.watch<CurrentPark>().currentPark?.rating != null
+                      ? Column(
+                        children: [
+                          RatingGroup(
+                            title: AppStrings.cleanliness,
+                            currentRating: _cleanlinessRating,
+                            onPressedHandler: (value) { },
+                            disabled: true,
+                          ),
+                          RatingGroup(
+                            title: AppStrings.noise,
+                            currentRating: _noiseRating,
+                            onPressedHandler: (value) { },
+                            disabled: true,
+                          ),
+                          RatingGroup(
+                            title: AppStrings.size,
+                            currentRating: _sizeRating,
+                            onPressedHandler: (value) { },
+                            disabled: true,
+                          ),
+                          RatingGroup(
+                            title: AppStrings.location,
+                            currentRating: _locationRating,
+                            onPressedHandler: (value) { },
+                            disabled: true,
+                          ),
+                          RatingGroup(
+                            title: AppStrings.activityEquipment,
+                            currentRating: _activityEquipmentRating,
+                            onPressedHandler: (value) { },
+                            disabled: true,
+                          ),
+                        ],
+                      )
+                      : Center(
+                        child: Text(
+                          AppStrings.parkNotRated,
+                          style: AppTextStyles.shadowHint,
+                        ),
+                      ),
                     Container(
-                      margin: EdgeInsets.only(top: 48),
+                      margin: EdgeInsets.only(top: 48, bottom: 64),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ElevatedButton(
-                            child: Text(
-                              'Rate This Park',
+                            child: const Text(
+                              AppStrings.ratePark,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -146,6 +181,7 @@ class ViewRatingPage extends StatelessWidget {
                             style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.resolveWith(getColor),
                               minimumSize: MaterialStateProperty.resolveWith<Size?>((states) => Size(150, 48)),
+                              elevation: MaterialStateProperty.resolveWith<double>((states) => 0.5)
                             ),
                             onPressed: () {
                               Navigator.push(
