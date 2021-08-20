@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:parks_bark/views/Home.dart';
-import '../app/ColorSets.dart';
+import 'package:parks_bark/app/color_sets.dart';
 
 class RatingSubmittedPage extends StatefulWidget {
   RatingSubmittedPage({ Key? key }) : super(key: key);

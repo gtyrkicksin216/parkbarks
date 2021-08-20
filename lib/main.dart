@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:parks_bark/models/current_park.dart';
+import 'package:parks_bark/models/park_image.dart';
+import 'package:provider/provider.dart';
 // Models
-import './app/ColorSets.dart';
+import './app/color_sets.dart';
 // Views
 import './views/Home.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ListenableProvider<CurrentPark>(create: (context) => CurrentPark()),
+        ListenableProvider<ParkImage>(create: (context) => ParkImage()),
+      ],
+      child: MyApp(),
+    )
+    // ChangeNotifierProvider(
+    //   create: (context) => CurrentPark(),
+    //   child: MyApp(),
+    // )
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -13,22 +29,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        // primarySwatch: Colors.blue,
-        // primarySwatch: BrandColors.brandPrimary,
-        primaryColor: BrandColors.brandPrimary,
-      ),
-      home: HomePage(),
-    );
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          // primarySwatch: Colors.blue,
+          // primarySwatch: BrandColors.brandPrimary,
+          primaryColor: BrandColors.brandPrimary,
+          accentColor: BrandColors.brandAccent,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          textTheme: GoogleFonts.montserratTextTheme(
+            Theme.of(context).textTheme,
+          ),
+        ),
+        home: HomePage(),
+      );
   }
 }
