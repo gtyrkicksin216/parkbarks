@@ -2,7 +2,7 @@ class AppStrings {
   /* Page Titles */
   static const String applicationName = 'Park Barks';
   static const String viewRating = 'View Rating';
-  static const String browseParks = 'Browse Parks';
+  static const String browseParks = 'Browse Parks Near You';
   /* Buttons */
   static const String submit = 'Submit';
   static const String cancel = 'Cancel';

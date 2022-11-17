@@ -4,14 +4,16 @@ import 'package:http/http.dart' as http;
 import 'package:parks_bark/models/park.dart';
 
 class RatedParksService {
-  // final String endpointUrl = 'http://localhost:3000/parks';
+  final String endpointUrl = Platform.isIOS
+    ? 'http://localhost:3000/parks'
+    : 'http://10.0.2.2:3000/parks';
   /*
     NOTE: Test this out for iOS. Android uses 10.0.2.2 as 'localhost'.
     May or may not work on iOS device. If this doesn't work for iOS simply add platform
     specific vars for local testing. This shouldn't have any effect when running the application
     pointed at an actual endpoint.
   */
-  final String endpointUrl = 'http://10.0.2.2:3000/parks';
+  // final String endpointUrl = 'http://10.0.2.2:3000/parks';
   final http.Client client = http.Client();
 
   Future<List<Park>> getAllRatedParks() async {

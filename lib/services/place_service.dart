@@ -6,8 +6,8 @@ import 'package:parks_bark/models/place_result.dart';
 
 class PlaceService {
   Future<List<PlaceResult>> getAutocomplete(String search) async {
-    final String androidKey = 'AIzaSyBt9l5XACaaB-wcGBz2UIHnOo66Zd4ZrP0';
-    final String iosKey = 'AIzaSyBt9l5XACaaB-wcGBz2UIHnOo66Zd4ZrP0';
+    final String androidKey = '::REPLACE_WITH_KEY::';
+    final String iosKey = '::REPLACE_WITH_KEY::';
     final String apiKey = Platform.isAndroid ? androidKey : iosKey;
     final url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?key=$apiKey&input=$search%20Dog%20Park';
 
